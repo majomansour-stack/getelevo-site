@@ -1,30 +1,54 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Elevo · Email confirmed</title>
+<title>Elevo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F5F0E6;--card:#FFFDF8;--ink:#2A2620;--muted:#5E574C;--olive:#4A5236;--terra:#C2694A;--line:#E6DDCB}
-@media (prefers-color-scheme:dark){:root{--bg:#1E1D19;--card:#2A2823;--ink:#F3EEE3;--muted:#CFC6B6;--line:#3A372F}}
+:root{--bg:#F6F1E8;--card:#FFFDF8;--ink:#1F3A5F;--muted:#7A5E28;--navy:#1F3A5F;--gold:#C9A227;--dark-gold:#7A5E28;--line:rgba(31,58,95,.14)}
+@media (prefers-color-scheme:dark){:root{--bg:#1F3A5F;--card:#16283F;--ink:#F6F1E8;--muted:#C9A227;--line:rgba(201,162,39,.35)}}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;display:flex;flex-direction:column}
-header{background:var(--olive);color:#fff;padding:28px 24px}header .brand{font-family:'Playfair Display',serif;font-size:24px;font-weight:600}
+header{background:var(--navy);color:#fff;padding:28px 24px;border-bottom:4px solid var(--gold)}header .brand{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#fff;text-decoration:none}
 main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:440px;width:100%;padding:32px 28px;text-align:center}
-.check{width:56px;height:56px;border-radius:50%;background:var(--terra);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:28px}
-h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;margin:0 0 10px}p{color:var(--muted);line-height:1.55;margin:0 0 14px;font-size:16px}
-#err{display:none}footer{text-align:center;color:var(--muted);font-size:13px;padding:20px}a{color:var(--terra)}
-</style></head><body>
-<header><div class="brand">Elevo</div></header>
+.check{width:56px;height:56px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:28px;font-weight:600}
+h1{font-family:'Playfair Display',serif;font-weight:500;font-size:30px;margin:0 0 10px;color:var(--ink)}p{color:var(--muted);line-height:1.55;margin:0 0 14px;font-size:16px}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:20px}a{color:var(--dark-gold)}
+@media (prefers-color-scheme:dark){a{color:var(--gold)}}
+[hidden]{display:none!important}
+</style>
+<script>
+(function(){
+  var search=location.search||'';
+  var hash=location.hash||'';
+  var hashBody=hash.length>1?hash.slice(1):'';
+  var q=new URLSearchParams(search.charAt(0)==='?'?search.slice(1):search);
+  var h=new URLSearchParams(hashBody);
+  function get(name){return q.has(name)?q.get(name):(h.has(name)?h.get(name):null);}
+  function has(name){return q.has(name)||h.has(name);}
+  var type=get('type')||'';
+  var forward=has('code')||has('access_token')||has('error')||has('error_code')||has('error_description')||type==='recovery'||hashBody.length>0;
+  if(forward){
+    location.replace('https://getelevo.app/app/'+search+hash);
+    return;
+  }
+  var confirmed=type==='signup'||type==='email'||type==='email_change'||type==='invite'||type==='magiclink';
+  if(confirmed){
+    document.addEventListener('DOMContentLoaded',function(){
+      document.title='Elevo · Email confirmed';
+      document.getElementById('ready').hidden=true;
+      document.getElementById('ok').hidden=false;
+    });
+  }
+})();
+</script>
+</head><body>
+<header><a class="brand" href="https://getelevo.app">Elevo</a></header>
 <main><div class="card">
-<div id="ok"><div class="check">&#10003;</div><h1>You're all set</h1>
+<div id="ready"><h1>Elevo</h1>
+<p>Open the Elevo app and sign in with your email and password.</p>
+<p><a href="https://getelevo.app/app/">Open the app</a></p></div>
+<div id="ok" hidden><div class="check">&#10003;</div><h1>You're all set</h1>
 <p>Your email is confirmed. Open the Elevo app and sign in with your email and password.</p></div>
-<div id="err"><h1>This link didn't work</h1>
-<p>The link may have expired or was already used. Open the Elevo app, sign in, and ask for a new confirmation email if needed.</p></div>
-<p>Questions? Email <a href="mailto:support@getelevo.app">support@getelevo.app</a></p>
+<p>Questions? Email <a href="mailto:hello@getelevo.app">hello@getelevo.app</a></p>
 </div></main>
 <footer>&copy; Elevo</footer>
-<script>
-var s=(location.hash||'')+'&'+(location.search||'');
-if(/error=|error_code=/.test(s)){document.getElementById('ok').style.display='none';document.getElementById('err').style.display='block';}
-if(location.hash){history.replaceState(null,'',location.pathname);}
-</script>
 </body></html>
