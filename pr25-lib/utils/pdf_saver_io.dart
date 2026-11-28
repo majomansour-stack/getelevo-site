@@ -1,0 +1,5 @@
+import 'dart:typed_data';
+import 'package:printing/printing.dart';
+
+Future<void> savePdfFile(Uint8List bytes, String filename) =>
+    Printing.sharePdf(bytes: bytes, filename: filename);

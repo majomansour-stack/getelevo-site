@@ -1,0 +1,40 @@
+# Function flags only. The rest of the project stays in the dashboard.
+# stripe-webhook is called by Stripe, which does not send a Supabase JWT.
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.stripe-billing-portal]
+verify_jwt = true
+
+[functions.stripe-checkout]
+verify_jwt = true
+
+[functions.send-push-notification]
+verify_jwt = true
+
+[functions.scheduled-emails]
+verify_jwt = false
+
+# Auth email templates. Apply on the live project with the management API.
+# Paths are relative to this file.
+
+[auth.email.template.confirmation]
+subject = "Confirm your Elevo account"
+content_path = "./templates/confirmation.html"
+
+[auth.email.template.magic_link]
+subject = "Your Elevo sign-in link"
+content_path = "./templates/magic_link.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Elevo password"
+content_path = "./templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your new Elevo email"
+content_path = "./templates/email_change.html"
+
+[auth.email.template.invite]
+subject = "You have been invited to Elevo"
+content_path = "./templates/invite.html"
