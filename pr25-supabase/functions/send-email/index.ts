@@ -236,7 +236,7 @@ function buildRentReminder(data: Record<string, string>): { subject: string; htm
     subject: `Rent Reminder — Payment Due ${dueDate}`,
     html: wrap(`
       <h2 style="margin:0 0 8px;color:${BRAND_COLOR};font-size:22px;">
-        Rent is due in 5 days
+        Rent is due in 2 days
       </h2>
       <p>Hi ${firstName},</p>
       <p>

@@ -185,6 +185,16 @@ function unitPlaceLabel(row: {
   return 'your unit';
 }
 
+/// Calendar date in America/Phoenix (UTC-7, no daylight saving).
+function phoenixToday(now = new Date()): Date {
+  const shifted = new Date(now.getTime() - 7 * 60 * 60 * 1000);
+  return new Date(Date.UTC(
+    shifted.getUTCFullYear(),
+    shifted.getUTCMonth(),
+    shifted.getUTCDate(),
+  ));
+}
+
 function dueDayOf(value: unknown): number {
   const n = typeof value === 'number' ? value : Number.parseInt(String(value ?? ''), 10);
   if (!Number.isFinite(n) || n < 1) return 1;
@@ -193,17 +203,20 @@ function dueDayOf(value: unknown): number {
 
 function nextDueDate(today: Date, rawDue: unknown): Date {
   const preferred = dueDayOf(rawDue);
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const year = today.getUTCFullYear();
+  const month = today.getUTCMonth();
   const clamp = (y: number, m: number) => {
-    const last = new Date(y, m + 1, 0).getDate();
+    const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
     return Math.min(preferred, last);
   };
-  const thisDue = new Date(year, month, clamp(year, month));
-  thisDue.setHours(0, 0, 0, 0);
+  const thisDue = new Date(Date.UTC(year, month, clamp(year, month)));
   if (thisDue.getTime() >= today.getTime()) return thisDue;
-  const next = new Date(year, month + 1, 1);
-  return new Date(next.getFullYear(), next.getMonth(), clamp(next.getFullYear(), next.getMonth()));
+  const next = new Date(Date.UTC(year, month + 1, 1));
+  return new Date(Date.UTC(
+    next.getUTCFullYear(),
+    next.getUTCMonth(),
+    clamp(next.getUTCFullYear(), next.getUTCMonth()),
+  ));
 }
 
 async function emailAllowed(userId: string, eventId: string): Promise<boolean> {
@@ -229,17 +242,17 @@ serve(async (req: Request) => {
     );
   }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = phoenixToday();
 
   let rentReminders   = 0;
   let leaseAlerts     = 0;
 
   try {
-    // ── 1. Rent reminders — 5 days before the unit's rent due day ───────────
-    // rent_due_day is the day of the month (1-31). A blank or missing day is
-    // the 1st. A failed send is retried on later runs in that window. A
-    // successful send is logged and is not sent again for the same due date.
+    // ── 1. Rent reminders — exactly 2 days before the due date ─────────────
+    // The date is America/Phoenix. rent_due_day is the day of the month.
+    // A blank day is the 1st. One reminder per due date: email_send_log
+    // blocks a second send. A failed send can be retried only if this job
+    // runs again on that same Phoenix day.
     const tenantRows = await query(
       `users?role=eq.tenant&select=id,full_name,email,unit_id`,
     ) as Array<{
@@ -276,9 +289,7 @@ serve(async (req: Request) => {
 
       const nextDue = nextDueDate(today, dueByUnit.get(tenant.unit_id));
       const daysUntilDue = daysBetween(today, nextDue);
-      // The first try is 5 days out. A failed send stays unlogged as sent,
-      // so the next daily run (still on or before the due date) tries again.
-      if (daysUntilDue < 0 || daysUntilDue > 5) continue;
+      if (daysUntilDue !== 2) continue;
 
       if (!(await emailAllowed(tenant.id, 'rent_reminder'))) continue;
       const period = `${nextDue.getFullYear()}-${String(nextDue.getMonth() + 1).padStart(2, '0')}-${String(nextDue.getDate()).padStart(2, '0')}`;

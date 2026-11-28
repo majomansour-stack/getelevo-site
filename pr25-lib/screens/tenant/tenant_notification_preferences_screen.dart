@@ -44,7 +44,7 @@ class _TenantNotificationPreferencesScreenState
     _NotifPref(
       id: 'rent_reminder',
       label: 'Rent Due Reminder',
-      subtitle: 'Reminder 5 days before rent is due',
+      subtitle: 'Reminder 2 days before rent is due',
       icon: LucideIcons.dollarSign,
       enabled: true,
     ),
